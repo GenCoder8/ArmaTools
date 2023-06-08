@@ -47,7 +47,7 @@ namespace ArmaTools
             if (fvi == null) return;
                 
 
-            buildStr(output, "GC Arma Dev Tools. version: " + fvi.FileVersion, outputSize);
+            buildStr(output, "GC Arma Dev Tools. Version: " + fvi.FileVersion, outputSize);
 
         }
         catch (Exception e)
@@ -64,9 +64,10 @@ namespace ArmaTools
     public static void RvExtension(StringBuilder output, int outputSize,
         [MarshalAs(UnmanagedType.LPStr)] string function)
     {
-   //if (function.Equals("version"))
-
-    output.Append(function);
+   if (isEqualVarName(function, "isLoaded"))
+    output.Append("true");
+   else
+     output.Append(function);
     }
 
 #if WIN64
@@ -80,10 +81,10 @@ namespace ArmaTools
     {
      try
      {
-      if (isEqualVarname(function,"doesFileExist"))
+      if (isEqualVarName(function,"doesFileExist"))
       {
-     if (argumentCheck(argCount, 1, ref output))
-     {
+      if (argumentCheck(argCount, 1, ref output))
+      {
              string s = args[0];
                         
              s = s.Replace("\"", "");
@@ -93,12 +94,12 @@ namespace ArmaTools
              bool res = FileExists(s);
 
              output.Append(res.ToString());
-         }
-
        }
-    else if (isEqualVarname(function, "ExecuteFile"))
+
+    }
+    else if (isEqualVarName(function, "ExecuteFile"))
     {
-     if (argumentCheck(argCount, 2, ref output))
+     if (argumentCheck(argCount, 3, ref output))
      {
       string argStr = "";
       for(int i = 1; i < args.Length; i++)
@@ -131,11 +132,11 @@ namespace ArmaTools
      return 0;
     }
 
-  static bool argumentCheck( int argCountGot, int argNeed, ref StringBuilder output)
+  static bool argumentCheck( int argCountGot, int argCountNeed, ref StringBuilder output)
   {
-   if (argNeed != argCountGot)
+   if (argCountNeed != argCountGot)
    {
-    output.Append("Invalid argument count. Got: " + argCountGot + " Need: " + argNeed);
+    output.Append("Invalid argument count. Got: " + argCountGot + " Need: " + argCountNeed);
     return false;
    }
    return true;
@@ -189,7 +190,7 @@ namespace ArmaTools
         }
     }
 
-  static bool isEqualVarname(string str1, string str2)
+  static bool isEqualVarName(string str1, string str2)
   {
    return String.Equals(str1,str2, StringComparison.OrdinalIgnoreCase);
   }
