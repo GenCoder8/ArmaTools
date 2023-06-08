@@ -47,7 +47,7 @@ namespace ArmaTools
             if (fvi == null) return;
                 
 
-            buildStr(output, "GC Arma Dev Tools. ver: " + fvi.FileVersion, outputSize);
+            buildStr(output, "GC Arma Dev Tools. version: " + fvi.FileVersion, outputSize);
 
         }
         catch (Exception e)
@@ -66,7 +66,7 @@ namespace ArmaTools
     {
    //if (function.Equals("version"))
 
-    //output.Append(function);
+    output.Append(function);
     }
 
 #if WIN64
@@ -82,8 +82,8 @@ namespace ArmaTools
      {
       if (isEqualVarname(function,"doesFileExist"))
       {
-         if (argCount == 1)
-         {
+     if (argumentCheck(argCount, 1, ref output))
+     {
              string s = args[0];
                         
              s = s.Replace("\"", "");
@@ -94,15 +94,11 @@ namespace ArmaTools
 
              output.Append(res.ToString());
          }
-         else
-         {
-             output.Append("Invalid argument count");
-         }
 
        }
     else if (isEqualVarname(function, "ExecuteFile"))
     {
-     if (argCount == 2)
+     if (argumentCheck(argCount, 2, ref output))
      {
       string argStr = "";
       for(int i = 1; i < args.Length; i++)
@@ -110,14 +106,12 @@ namespace ArmaTools
        argStr += args[i] + " ";
       }
 
-      output.Append("Executing file \"" + args[0] + "\"" + " Args: " + argStr);
-      ExecuteFile(args[0], argStr);
+      output.Append("Executing file \"" + args[0] + "\"" + " Args: " + argStr + " ");
+      if (ExecuteFile(args[0], argStr))
+       output.Append("Success");
+      else
+       output.Append("Failed");
 
-
-     }
-     else
-     {
-      output.Append("Invalid argument count");
      }
     }
     else
@@ -136,6 +130,16 @@ namespace ArmaTools
 
      return 0;
     }
+
+  static bool argumentCheck( int argCountGot, int argNeed, ref StringBuilder output)
+  {
+   if (argNeed != argCountGot)
+   {
+    output.Append("Invalid argument count. Got: " + argCountGot + " Need: " + argNeed);
+    return false;
+   }
+   return true;
+  }
 
     static bool FileExists(string path)
     {
