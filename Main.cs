@@ -80,7 +80,7 @@ namespace ArmaTools
     {
      try
      {
-      if (function.Equals("doesFileExist"))
+      if (isEqualVarname(function,"doesFileExist"))
       {
          if (argCount == 1)
          {
@@ -100,7 +100,7 @@ namespace ArmaTools
          }
 
        }
-    else if (function.Equals("ExecuteFile"))
+    else if (isEqualVarname(function, "ExecuteFile"))
     {
      if (argCount == 2)
      {
@@ -122,7 +122,7 @@ namespace ArmaTools
     }
     else
     {
-     output.Append("Invalid function name \"" + args[0] + "\"");
+     output.Append("Invalid function name \"" + function + "\"");
     }
 
     }
@@ -185,6 +185,11 @@ namespace ArmaTools
         }
     }
 
-}
+  static bool isEqualVarname(string str1, string str2)
+  {
+   return String.Equals(str1,str2, StringComparison.OrdinalIgnoreCase);
+  }
+
+ }
 
 }
