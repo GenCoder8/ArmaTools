@@ -17,121 +17,173 @@ namespace ArmaTools
     class MyExtension
     {
 
-        public static ExtensionCallback callback;
-        public delegate int ExtensionCallback([MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] string function, [MarshalAs(UnmanagedType.LPStr)] string data);
+     public static ExtensionCallback callback;
+     public delegate int ExtensionCallback([MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] string function, [MarshalAs(UnmanagedType.LPStr)] string data);
 
 #if WIN64
-        [DllExport("RVExtensionRegisterCallback", CallingConvention = CallingConvention.Winapi)]
+    [DllExport("RVExtensionRegisterCallback", CallingConvention = CallingConvention.Winapi)]
 #else
-		[DllExport("_RVExtensionRegisterCallback@4", CallingConvention = CallingConvention.Winapi)]
+	[DllExport("_RVExtensionRegisterCallback@4", CallingConvention = CallingConvention.Winapi)]
 #endif
-        public static void RVExtensionRegisterCallback([MarshalAs(UnmanagedType.FunctionPtr)] ExtensionCallback func)
-        {
-            callback = func;
-        }
+    public static void RVExtensionRegisterCallback([MarshalAs(UnmanagedType.FunctionPtr)] ExtensionCallback func)
+    {
+        callback = func;
+    }
 
 #if WIN64
-        [DllExport("RVExtensionVersion", CallingConvention = CallingConvention.Winapi)]
+    [DllExport("RVExtensionVersion", CallingConvention = CallingConvention.Winapi)]
 #else
-		[DllExport("_RVExtensionVersion@8", CallingConvention = CallingConvention.Winapi)]
+	[DllExport("_RVExtensionVersion@8", CallingConvention = CallingConvention.Winapi)]
 #endif
-        public static void RvExtensionVersion(StringBuilder output, int outputSize)
+    public static void RvExtensionVersion(StringBuilder output, int outputSize)
+    {
+        try
         {
-            try
-            {
-                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-                if (assembly == null) return;
+            if (assembly == null) return;
                 
-                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-                if (fvi == null) return;
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            if (fvi == null) return;
                 
 
-                buildStr(output, "GC Arma Dev Tools. ver: " + fvi.FileVersion, outputSize);
+            buildStr(output, "GC Arma Dev Tools. ver: " + fvi.FileVersion, outputSize);
 
-            }
-            catch (Exception e)
-            {
-                output.Append(e.Message);
-            }
         }
+        catch (Exception e)
+        {
+            output.Append(e.Message);
+        }
+    }
 
 #if WIN64
-        [DllExport("RVExtension", CallingConvention = CallingConvention.Winapi)]
+    [DllExport("RVExtension", CallingConvention = CallingConvention.Winapi)]
 #else
-		[DllExport("_RVExtension@12", CallingConvention = CallingConvention.Winapi)]
+	[DllExport("_RVExtension@12", CallingConvention = CallingConvention.Winapi)]
 #endif
-        public static void RvExtension(StringBuilder output, int outputSize,
-            [MarshalAs(UnmanagedType.LPStr)] string function)
-        {
-            output.Append(function);
-        }
+    public static void RvExtension(StringBuilder output, int outputSize,
+        [MarshalAs(UnmanagedType.LPStr)] string function)
+    {
+   //if (function.Equals("version"))
+
+    //output.Append(function);
+    }
 
 #if WIN64
-        [DllExport("RVExtensionArgs", CallingConvention = CallingConvention.Winapi)]
+    [DllExport("RVExtensionArgs", CallingConvention = CallingConvention.Winapi)]
 #else
-		[DllExport("_RVExtensionArgs@20", CallingConvention = CallingConvention.Winapi)]
+	[DllExport("_RVExtensionArgs@20", CallingConvention = CallingConvention.Winapi)]
 #endif
-        public static int RvExtensionArgs(StringBuilder output, int outputSize,
-            [MarshalAs(UnmanagedType.LPStr)] string function,
-            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr, SizeParamIndex = 4)] string[] args, int argCount)
-        {
-            try
-            {
-                if (function.Equals("doesFileExist"))
-                {
-                    if (argCount == 1)
-                    {
-                        string s = args[0];
+    public static int RvExtensionArgs(StringBuilder output, int outputSize,
+        [MarshalAs(UnmanagedType.LPStr)] string function,
+        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr, SizeParamIndex = 4)] string[] args, int argCount)
+    {
+     try
+     {
+      if (function.Equals("doesFileExist"))
+      {
+         if (argCount == 1)
+         {
+             string s = args[0];
                         
-                        s = s.Replace("\"", "");
+             s = s.Replace("\"", "");
 
-                      //  s = s.Replace("\\", "");
+           //  s = s.Replace("\\", "");
 
-                        bool res = FileExists(s);
+             bool res = FileExists(s);
 
-                        output.Append(res.ToString());
-                    }
-                    else
-                    {
-                        output.Append("Invalid argument count");
-                    }
+             output.Append(res.ToString());
+         }
+         else
+         {
+             output.Append("Invalid argument count");
+         }
 
-                }
+       }
+    else if (function.Equals("ExecuteFile"))
+    {
+     if (argCount == 2)
+     {
+      string argStr = "";
+      for(int i = 1; i < args.Length; i++)
+      {
+       argStr += args[i] + " ";
+      }
 
-            }
-            catch (Exception e)
-            {
-                if (argCount > 0)
-                    output.Append("file: " + args[0] + "   ");
+      output.Append("Executing file \"" + args[0] + "\"" + " Args: " + argStr);
+      ExecuteFile(args[0], argStr);
 
-                output.Append("Operation Failed " + e.Message);
-            }
 
-            return 0;
-        }
+     }
+     else
+     {
+      output.Append("Invalid argument count");
+     }
+    }
+    else
+    {
+     output.Append("Invalid function name \"" + args[0] + "\"");
+    }
 
-        static bool FileExists(string path)
+    }
+    catch (Exception e)
+    {
+        if (argCount > 0)
+            output.Append("file: " + args[0] + "   ");
+
+        output.Append("Operation Failed " + e.Message);
+    }
+
+     return 0;
+    }
+
+    static bool FileExists(string path)
+    {
+        var dirInfo = new DirectoryInfo(Path.GetDirectoryName(path));
+        string file = Path.GetFileName(path);
+        bool exists = (dirInfo.Exists && dirInfo.EnumerateFiles().Any(f => f.Name.Equals(file)));
+        return exists;
+    }
+
+    static bool ExecuteFile(string filename,string args)
+    {
+     ProcessStartInfo startInfo = new ProcessStartInfo();
+     startInfo.CreateNoWindow = true;
+     startInfo.UseShellExecute = false;
+     startInfo.FileName = filename;
+     startInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+     startInfo.Arguments = args;
+
+   try
+   {
+    using (Process exeProcess = Process.Start(startInfo))
+    {
+     //exeProcess.WaitForExit();
+    }
+   }
+   catch (Exception ex)
+   {
+    //MessageBox.Show(ex.ToString());
+    return false;
+   }
+
+   return true;
+  }
+
+    static void buildStr(StringBuilder strb, string str, int maxSize, bool reportError = false)
+    {
+        strb.Append(str);
+
+        if (strb.Length >= maxSize)
         {
-            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(path));
-            string file = Path.GetFileName(path);
-            bool exists = (dirInfo.Exists && dirInfo.EnumerateFiles().Any(f => f.Name.Equals(file)));
-            return exists;
-        }
+            strb.Length = maxSize - 1;
 
-        static void buildStr(StringBuilder strb, string str, int maxSize, bool reportError = false)
-        {
-            strb.Append(str);
-
-            if (strb.Length >= maxSize)
-            {
-                strb.Length = maxSize - 1;
-
-                if (reportError)
-                    throw new Exception("String builder out of range");
+            if (reportError)
+                throw new Exception("String builder out of range");
                 
-            }
         }
+    }
 
 }
 
