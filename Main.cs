@@ -99,7 +99,18 @@ namespace ArmaTools
     }
     else if (isEqualVarName(function, "ExecuteFile"))
     {
-     if (argumentCheck(argCount, 3, ref output))
+
+     if (argumentCheck(argCount, 2, ref output))
+     {
+      output.Append("Executing file \"" + args[0] + "\"" + " Args: " + args[1] + " ");
+      if (ExecuteFile(args[0], args[1]))
+       output.Append("Success");
+      else
+       output.Append("Failed");
+
+     }
+
+     /*if (argumentCheck(argCount, 3, ref output))
      {
       string argStr = "";
       for(int i = 1; i < args.Length; i++)
@@ -113,7 +124,7 @@ namespace ArmaTools
       else
        output.Append("Failed");
 
-     }
+     }*/
     }
     else
     {
@@ -152,7 +163,10 @@ namespace ArmaTools
 
     static bool ExecuteFile(string filename,string args)
     {
-     ProcessStartInfo startInfo = new ProcessStartInfo();
+    try
+    {
+
+    ProcessStartInfo startInfo = new ProcessStartInfo();
      startInfo.CreateNoWindow = true;
      startInfo.UseShellExecute = false;
      startInfo.FileName = filename;
@@ -160,8 +174,7 @@ namespace ArmaTools
 
      startInfo.Arguments = args;
 
-   try
-   {
+
     using (Process exeProcess = Process.Start(startInfo))
     {
      //exeProcess.WaitForExit();
