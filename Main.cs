@@ -105,7 +105,8 @@ namespace ArmaTools
       if (!FileExists(file))
        throw new Exception("ExecuteFile file not found");
 
-      output.Append("Executing file \"" + args[0] + "\"" + " Args: " + args[1] + " ");
+      output.Append("Executing file \"" + file + "\"" + " Args: " + args[1] + " ");
+
       if (ExecuteFile(file, args[1]))
        output.Append("Success");
       else
@@ -173,7 +174,6 @@ namespace ArmaTools
     {
     try
     {
-
     ProcessStartInfo startInfo = new ProcessStartInfo();
      startInfo.CreateNoWindow = true;
      startInfo.UseShellExecute = false;
