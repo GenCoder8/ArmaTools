@@ -85,15 +85,13 @@ namespace ArmaTools
       {
       if (argumentCheck(argCount, 1, ref output))
       {
-             string s = args[0];
-                        
-             s = s.Replace("\"", "");
+       string file = FixFilePath(ref args[0]);
 
            //  s = s.Replace("\\", "");
 
-             bool res = FileExists(s);
+        bool res = FileExists(file);
 
-             output.Append(res.ToString());
+        output.Append(res.ToString());
        }
 
     }
@@ -102,8 +100,13 @@ namespace ArmaTools
 
      if (argumentCheck(argCount, 2, ref output))
      {
+      string file = FixFilePath(ref args[0]); // Must strip quotes from file path
+
+      if (!FileExists(file))
+       throw new Exception("ExecuteFile file not found");
+
       output.Append("Executing file \"" + args[0] + "\"" + " Args: " + args[1] + " ");
-      if (ExecuteFile(args[0], args[1]))
+      if (ExecuteFile(file, args[1]))
        output.Append("Success");
       else
        output.Append("Failed");
@@ -135,7 +138,7 @@ namespace ArmaTools
     catch (Exception e)
     {
         if (argCount > 0)
-            output.Append("file: " + args[0] + "   ");
+            output.Append("Function: " + function + " arg: " + args[0] + "   ");
 
         output.Append("Operation Failed " + e.Message);
     }
@@ -153,12 +156,17 @@ namespace ArmaTools
    return true;
   }
 
+  static string FixFilePath(ref string path)
+  {
+   return path.Replace("\"", "");
+  }
+
     static bool FileExists(string path)
     {
-        var dirInfo = new DirectoryInfo(Path.GetDirectoryName(path));
-        string file = Path.GetFileName(path);
-        bool exists = (dirInfo.Exists && dirInfo.EnumerateFiles().Any(f => f.Name.Equals(file)));
-        return exists;
+    var dirInfo = new DirectoryInfo(Path.GetDirectoryName(path));
+    string file = Path.GetFileName(path);
+    bool exists = (dirInfo.Exists && dirInfo.EnumerateFiles().Any(f => f.Name.Equals(file)));
+    return exists;
     }
 
     static bool ExecuteFile(string filename,string args)
@@ -173,7 +181,6 @@ namespace ArmaTools
      startInfo.WindowStyle = ProcessWindowStyle.Normal;
 
      startInfo.Arguments = args;
-
 
     using (Process exeProcess = Process.Start(startInfo))
     {
